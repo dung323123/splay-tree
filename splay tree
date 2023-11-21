@@ -1,0 +1,222 @@
+Exercise 3:
+// Write your helper functions here
+
+Node* remove(int val)
+{
+    //TODO
+    if (!root)
+    return nullptr;
+    search(val);
+    
+    if (root->val == val)
+    {
+        if (!root->pLeft)
+        {
+            Node* tmp = root;
+            root = root->pRight;
+            
+            if (root)
+            root->pParent = nullptr;
+            return tmp;
+        }
+        
+        Node* treeLeft = root->pLeft;
+        Node* treeRight = root->pRight;
+        treeLeft->pParent = nullptr;
+        root->pLeft = root->pRight = nullptr;
+        Node* ans = root;
+        
+        while (treeLeft->pRight)
+        treeLeft = treeLeft->pRight;
+        splay(treeLeft);
+        treeLeft->pRight = treeRight;
+        
+        if (treeRight)
+        treeRight->pParent = treeLeft;
+        return ans;
+    }
+    return nullptr;
+}
+Exercise 2:
+// Write your helper functions here
+bool searchRec(int val, Node*& node, Node*& parent)
+{
+    if (!node)
+    {
+        if (parent)
+        splay(parent);
+        return false;
+    }
+    
+    if (val < node->val)
+    return searchRec(val, node->pLeft, node);
+    
+    if (val > node->val)
+    return searchRec(val, node->pRight, node);
+    
+    splay(node);
+    return true;
+}
+
+bool search(int val)
+{
+    //TODO
+    if (!root)
+    return false;
+    
+    return searchRec(val, root, root->pParent);
+}
+Exercise 1:
+// write your helper functions here
+void rightRotate(Node* x) 
+{
+    Node* y = x->pLeft;
+    x->pLeft = y->pRight;
+   
+    if (y->pRight) 
+    {
+        y->pRight->pParent = x;
+    }
+    y->pParent = x->pParent;
+    
+    if (!x->pParent) 
+    {
+        root = y;
+    } 
+    
+    else if (x == x->pParent->pLeft) 
+    {
+        x->pParent->pLeft = y;
+    } 
+    
+    else 
+    {
+        x->pParent->pRight = y;
+    }
+    y->pRight = x;
+    x->pParent = y;
+}
+
+void leftRotate(Node* x) 
+{
+    Node* y = x->pRight;
+    x->pRight = y->pLeft;
+    
+    if (y->pLeft) 
+    {
+        y->pLeft->pParent = x;
+    }
+    y->pParent = x->pParent;
+    
+    if (!x->pParent) 
+    {
+        root = y;
+    } 
+    
+    else if (x == x->pParent->pLeft) 
+    {
+        x->pParent->pLeft = y;
+    } 
+    
+    else 
+    {
+        x->pParent->pRight = y;
+    }
+    y->pLeft = x;
+    x->pParent = y;
+}
+
+void splay(Node* p) 
+{
+    while (p->pParent) 
+    {
+        Node* parent = p->pParent;
+        Node* grandparent = parent->pParent;
+
+        if (!grandparent) 
+        {
+            //Zig step
+            if (p == parent->pLeft) 
+            {
+                rightRotate(parent);
+            } 
+            
+            else 
+            {
+                leftRotate(parent);
+            }
+            
+        } 
+        
+        else 
+        {
+            // Zig-zig or Zig-zag step
+            if (p == parent->pLeft && parent == grandparent->pLeft) 
+            {
+                rightRotate(grandparent);
+                rightRotate(parent);
+            } 
+            
+            else if (p == parent->pRight && parent == grandparent->pRight) 
+            {
+                leftRotate(grandparent);
+                leftRotate(parent);
+            } 
+            
+            else 
+            {
+                // Zig-zag step
+                if (p == parent->pLeft) 
+                {
+                    rightRotate(parent);
+                    leftRotate(grandparent);
+                } 
+                
+                else 
+                {
+                    leftRotate(parent);
+                    rightRotate(grandparent);
+                }
+            }
+        }
+    }
+    root = p;
+}
+
+void insert(int val) 
+{
+    if (!root) 
+    {
+        root = new Node(val);
+        return;
+    }
+
+    Node* current = root;
+    Node* parent = nullptr;
+
+    while (current) 
+    {
+        parent = current;
+        if (val < current->val) 
+        {
+            current = current->pLeft;
+        } 
+        
+        else 
+        {
+            current = current->pRight;
+        }
+    }
+
+    Node* newNode = new Node(val, nullptr, nullptr, parent);
+    if (val < parent->val) 
+    {
+        parent->pLeft = newNode;
+    } 
+    
+    else 
+    {
+        parent->pRight = newNode;
+    }
+    splay(newNode);
+}
